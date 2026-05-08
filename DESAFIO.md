@@ -32,7 +32,7 @@ data/
 Planilha preenchida manualmente pela equipe com as cobranças do mês. Contém os campos:
 `id_cobranca`, `paciente`, `registro_ans`, `procedimento`, `data_atendimento`, `valor`
 
-Por ser preenchida à mão, pode conter erros de digitação — nomes truncados, valores incorretos, códigos ANS errados, descrições com typos.
+Por ser preenchida à mão, pode conter erros de digitação — nomes truncados, valores incorretos, códigos de convênio errados, descrições com typos.
 
 ---
 
@@ -45,7 +45,7 @@ Exportação do sistema legado do convênio. Separador: ponto-e-vírgula. Conté
 | `num_guia` | Identificador da cobrança |
 | `nome_beneficiario` | Nome no formato `SOBRENOME, NOME`, em maiúsculas sem acento |
 | `cpf_beneficiario` | CPF do paciente (não existe no Excel) |
-| `ans` | Registro ANS do convênio |
+| `ans` | Código do convênio |
 | `nome_operadora` | Nome do convênio por extenso |
 | `descricao_servico` | Procedimento em maiúsculas sem acento |
 | `cod_tuss` | Código do procedimento na tabela TUSS (não existe no Excel) |
@@ -83,17 +83,11 @@ Identifique e registre em log todas as divergências encontradas:
 - Cobranças presentes em apenas uma das fontes
 - Diferenças de valor entre as fontes (use `vl_liquido` do CSV como referência)
 - Diferenças de nome de paciente (indicativo de erro de digitação)
-- Diferenças no código `registro_ans`
+- Diferenças no código de convênio entre as fontes
 
 ---
 
-### 2. Verificar os registros ANS
-
-Consulte o portal público da ANS para verificar a situação de cada `registro_ans` presente nas cobranças — incluindo os que parecem incorretos.
-
----
-
-### 3. Renomear os laudos
+### 2. Renomear os laudos
 
 Para cada PDF da pasta `laudos/`, identifique a qual paciente e cobrança ele pertence — usando os dados consolidados como referência — e renomeie para o padrão `CPF-NOMEPACIENTE-IDCOBRANCA-MMYYYY.pdf`.
 
@@ -101,21 +95,21 @@ O vínculo deve ser feito por similaridade entre o nome do arquivo e os nomes do
 
 ---
 
-### 4. Gerar o relatório Excel
+### 3. Gerar o relatório Excel
 
 Gere um arquivo `relatorio_faturamento_YYYYMM.xlsx` com no mínimo três seções:
 
-**Resumo** — totais do processamento: cobranças por fonte, valor líquido total, total de glosas, situação dos registros ANS, resultado da renomeação dos laudos.
+**Resumo** — totais do processamento: cobranças por fonte, valor líquido total, total de glosas e resultado da renomeação dos laudos.
 
-**Detalhamento** — todas as cobranças consolidadas com os campos enriquecidos (CPF, TUSS, datas, valores por fonte, nome da operadora, situação ANS, nome do PDF renomeado) e uma coluna descrevendo o que diverge em cada linha.
+**Detalhamento** — todas as cobranças consolidadas com os campos enriquecidos (CPF, TUSS, datas, valores por fonte, nome do convênio, nome do PDF renomeado) e uma coluna descrevendo o que diverge em cada linha.
 
-**Alertas** — apenas as cobranças que apresentam algum tipo de inconsistência (divergência de valor, nome, ANS inválido, fonte única).
+**Alertas** — apenas as cobranças que apresentam algum tipo de inconsistência (divergência de valor, nome, código de convênio divergente ou fonte única).
 
 Aplique formatação adequada: cabeçalhos destacados, alertas sinalizados visualmente, colunas com largura ajustada ao conteúdo.
 
 ---
 
-### 5. Enviar o relatório por e-mail
+### 4. Enviar o relatório por e-mail
 
 Ao final do pipeline, envie por e-mail o relatório gerado como anexo. O corpo do e-mail deve estar em HTML e conter um resumo das informações principais.
 
@@ -123,22 +117,28 @@ Configure remetente, destinatário e credenciais SMTP via variáveis de ambiente
 
 ---
 
-### 6. Automatizar a execução
+### 5. Automatizar a execução
 
 Crie um script shell que execute o pipeline completo, registre logs com timestamp e encerre com código de saída `1` em caso de falha. Inclua, comentado no script, o comando cron necessário para execução automática toda segunda-feira às 06h30.
 
 ---
 
-## Entrega
+## O que entregar
 
 O repositório deve conter:
 
-- **README** com instruções claras de instalação, configuração (`.env.example`) e execução
-- Os arquivos de dados em `data/` (já fornecidos neste repositório)
-- O código-fonte organizado da forma que você julgar mais adequada
-- Os arquivos gerados **não** devem ser versionados (configure o `.gitignore`)
+### Código e configuração
+- Código-fonte organizado da forma que você julgar mais adequada — não há estrutura de pastas obrigatória
+- `README.md` com instruções claras de instalação, configuração e execução
+- `.env.example` com todas as variáveis necessárias (sem valores reais)
+- `.gitignore` configurado para não versionar arquivos gerados, logs e o `.env`
 
-Não existe uma estrutura de pastas ou arquitetura obrigatória. Organize da forma que fizer mais sentido para você — isso faz parte do que será avaliado.
+### Dados
+- Os arquivos de dados originais em `data/` (já estão neste repositório — não remova)
+- Os arquivos gerados pelo pipeline (`relatorio_faturamento_*.xlsx`, logs, PDFs renomeados) **não** devem ser versionados
+
+### Reflexão
+- Um arquivo `RESPOSTAS.md` na raiz do repositório com as respostas ao questionário disponível em `QUESTIONARIO.md`
 
 ---
 
@@ -146,9 +146,10 @@ Não existe uma estrutura de pastas ou arquitetura obrigatória. Organize da for
 
 - Corretude: o pipeline roda, produz os outputs esperados e detecta as inconsistências dos arquivos
 - Qualidade do código: legibilidade, organização, ausência de repetição desnecessária
-- Tratamento de erros: o pipeline é resiliente a dados ruins e falhas de rede
+- Tratamento de erros: o pipeline é resiliente a dados ruins e falhas inesperadas
 - Logs: mensagens úteis que permitem entender o que aconteceu em cada execução
 - README: claro o suficiente para alguém reproduzir o ambiente do zero
 - Histórico de commits: evidência de raciocínio incremental
+- RESPOSTAS.md: clareza de pensamento, capacidade de justificar decisões técnicas e visão de evolução
 
 > Estamos mais interessados em como você estrutura o raciocínio e lida com problemas reais do que em um código perfeito.
