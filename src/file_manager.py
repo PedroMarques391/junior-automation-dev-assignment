@@ -2,7 +2,9 @@ import os
 import re
 from pathlib import Path
 
+import pandas as pd
 from pypdf import PdfReader
+from unidecode import unidecode
 
 
 class FileManager:
@@ -13,11 +15,18 @@ class FileManager:
         if match:
             return match.group(0)
         return None
+    
+    @staticmethod
+    def normalize_pdf_name(file_name: str) -> str:
+        name = unidecode(file_name).upper().strip()
+        name = re.sub(r'\s+', ' ', name)
+        return name
         
     @classmethod
-    def create_guias_cob_list(cls, folder_path: str) -> list:
-        pdf_files = Path(folder_path).glob('*.pdf')
-        result = []
-        for pdf_file in pdf_files:
-            result.append(cls._reader_pdf(pdf_file))
-        return result
+    def create_pdf_names_list(cls, folder_path: str) -> list:
+        pdf_names = []
+        for file in Path(folder_path).glob('*.pdf'):
+            name = Path(file).stem
+            normalized_name = cls.normalize_pdf_name(name)
+            pdf_names.append(normalized_name) 
+        return pdf_names 
