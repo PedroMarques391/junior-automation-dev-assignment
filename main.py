@@ -35,8 +35,7 @@ def main():
 
     merged_df['divergencias'] = merged_df.apply(Processing.check_divergences, axis=1)
 
-    merged_df.to_csv('data/merged_data.csv', index=False) 
-    merged_df.to_excel('data/merged_data.xlsx', index=False) 
+    merged_df.to_csv('data/merged_data.csv', index=False)
     
     logger.info('Processo finalizado.')
 
