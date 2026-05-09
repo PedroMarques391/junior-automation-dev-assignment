@@ -20,6 +20,13 @@ class Processing:
         return name
     
     @staticmethod
+    def normalize_value(value: int) -> str:
+        intToFloat = round(float(value), 2)
+        normalized_value = f"{intToFloat:.2f}".replace('.', ',')
+        return normalized_value
+            
+    
+    @staticmethod
     def merge_dataFrames(df1: pd.DataFrame, df2: pd.DataFrame, key: str) -> pd.DataFrame:
         merged_df = pd.merge(df1, df2, on=key, how="outer", indicator=True, suffixes=('_excel', '_csv'))
         return merged_df
