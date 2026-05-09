@@ -1,5 +1,6 @@
 import logging
 import re
+
 import pandas as pd
 from unidecode import unidecode
 
@@ -55,7 +56,7 @@ class Processing:
             if float(row['vl_liquido']) != float(row['valor']):
                 notes.append(f"Divergência de valor: CSV {row['vl_liquido']} vs Excel {row['valor']}")
                 logger.warning(f"Divergência de valor: CSV {row['vl_liquido']} vs Excel {row['valor']}")
-                logger.warning(f"Diferença: {float(row['vl_liquido']) - float(row['valor'])}")
+                logger.warning(f"Diferença: R$ {float(row['valor']) - float(row['vl_liquido'])}")
             if row['nome_beneficiario'] != row['paciente']:
                 notes.append("Nome do paciente com erro de digitação")
                 logger.warning(f"Nome do paciente com erro de digitação: {row['nome_beneficiario']} vs {row['paciente']}")
