@@ -20,10 +20,11 @@ class Processing:
         return name
     
     @staticmethod
-    def merge_dataFrames(df1: pd.DataFrame, df2: pd.DataFrame, key1: str, key2: str) -> pd.DataFrame:
-        merged_df = pd.merge(df1, df2, left_on=key1, right_on=key2, how='outer')
+    def merge_dataFrames(df1: pd.DataFrame, df2: pd.DataFrame, key: str) -> pd.DataFrame:
+        merged_df = pd.merge(df1, df2, on=key, how="outer", indicator=True, suffixes=('_excel', '_csv'))
         return merged_df
     
     @staticmethod
-    def rename_columns(df: pd.DataFrame, columns_mapping: dict) -> pd.DataFrame:
-        return df.rename(columns=columns_mapping)
+    def rename_columns(df: pd.DataFrame, columns: dict) -> pd.DataFrame:
+        return df.rename(columns=columns)
+    
