@@ -36,7 +36,9 @@ def main():
     merged_df['divergencias'] = merged_df.apply(Processing.check_divergences, axis=1)
 
     merged_df.to_csv('data/merged_data.csv', index=False)
-    
+
+    logger.info(f'Arquivo salvo em: data/merged_data.csv')
+        
     logger.info('Processo finalizado.')
 
 if __name__ == '__main__':
