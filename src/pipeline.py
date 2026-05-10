@@ -18,6 +18,9 @@ class Pipeline:
 
         convenio['nome_beneficiario'] = convenio['nome_beneficiario'].apply(Processing.normalize_name)
         internas['paciente'] = internas['paciente'].apply(Processing.normalize_name)
+        
+        convenio['ans'] = convenio['ans'].astype('Int64')
+        internas['registro_ans'] = internas['registro_ans'].astype('Int64')
 
         convenio['vl_liquido'] = convenio['vl_liquido'].apply(Processing.normalize_value_csv_to_float)
         internas['valor'] = internas['valor'].astype(float)
