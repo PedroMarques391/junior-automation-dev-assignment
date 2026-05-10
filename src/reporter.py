@@ -42,9 +42,6 @@ class Reporter:
             "Nome Operadora": self.df_data['nome_operadora'],
             "PDF Renomeado": self.df_data['arquivo_renomeado'],
             "Divergencias": self.df_data['divergencias'],
-               
-                
-            
         }
         return pd.DataFrame(detailed_data)
     
