@@ -45,7 +45,7 @@ class FileManager:
         
         for file_path in Path(folder_path).glob('*.pdf'):
             original_file = file_path.name
-            normalized_name = cls.normalize_pdf_name(file_path.stem)
+            normalized_name = cls._normalize_pdf_name(file_path.stem)
 
             patient_match = process.extractOne(
                 normalized_name,
@@ -88,7 +88,7 @@ class FileManager:
             charge_id = str(row["num_guia"])
             
             try:
-                date_obj = pd.to_datetime(row["realization_date"])
+                date_obj = pd.to_datetime(row["dt_realizacao"])
                 mm_yyyy = date_obj.strftime("%m%Y")
             except Exception as e:
                 logging.error(f"Erro ao converter data de {charge_id}: {e}")
