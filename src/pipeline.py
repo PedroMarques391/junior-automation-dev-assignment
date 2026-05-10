@@ -5,6 +5,7 @@ import pandas as pd
 
 from src.file_manager import FileManager
 from src.loaders import DataLoader
+from src.mailer import Mailer
 from src.processing import Processing
 from src.reporter import Reporter
 
@@ -65,12 +66,28 @@ class Pipeline:
               
         logger.info('Processo finalizado.')
         logger.info("====== step 3: finished ======")
+        
+    @staticmethod 
+    def step4():
+        logger.info("====== step 4: send email ======")
+        logger.info('Iniciando o processo de envio de e-mail...')
+        
+        report_files = list(Path(f"{Path.cwd()}/data/relatorio/").glob("*.xlsx"))
+        report_df = pd.read_excel(report_files[-1])
+        normalize_dict = dict(zip(report_df['Descrição'], report_df['Valor']))
+        
+        mailer = Mailer()
+        mailer.send_email(normalize_dict, report_files[-1])
+        
+        logger.info('Processo finalizado.')
+        logger.info("====== step 4: finished ======")
 
     @classmethod
     def Pipeline(cls):
         cls.step1()
         cls.step2()
         cls.step3()
+        cls.step4()
 
 
         
