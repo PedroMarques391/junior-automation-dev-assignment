@@ -1,9 +1,12 @@
+import logging
 import os
 import re
+import shutil
 from pathlib import Path
 
 import pandas as pd
 from pypdf import PdfReader
+from rapidfuzz import fuzz, process
 from unidecode import unidecode
 
 
@@ -17,16 +20,100 @@ class FileManager:
         return None
     
     @staticmethod
-    def normalize_pdf_name(file_name: str) -> str:
+    def _normalize_pdf_name(file_name: str) -> str:
         name = unidecode(file_name).upper().strip()
         name = re.sub(r'\s+', ' ', name)
         return name
         
-    @classmethod
-    def create_pdf_names_list(cls, folder_path: str) -> list:
+    @staticmethod
+    def create_pdf_names_list(folder_path: str) -> list:
         pdf_names = []
         for file in Path(folder_path).glob('*.pdf'):
             name = Path(file).stem
-            normalized_name = cls.normalize_pdf_name(name)
+            normalized_name = FileManager._normalize_pdf_name(name)
             pdf_names.append(normalized_name) 
         return pdf_names 
+    
+    @classmethod
+    def rename_pdf_files(cls, folder_path: str, output_folder: str, df_data: pd.DataFrame, min_score: float = 75.0):
+        results: list[dict] = []
+        
+        output_path = Path(output_folder)
+        output_path.mkdir(exist_ok=True)
+        
+        unique_clients = df_data['key'].dropna().unique().tolist()
+        
+        for file_path in Path(folder_path).glob('*.pdf'):
+            original_file = file_path.name
+            normalized_name = cls.normalize_pdf_name(file_path.stem)
+
+            patient_match = process.extractOne(
+                normalized_name,
+                unique_clients,
+                scorer=fuzz.token_set_ratio, 
+                score_cutoff=min_score,
+            )        
+           
+            if patient_match is None:
+                logging.warning(f"Sem match de paciente para: '{original_file}'")
+                results.append({
+                    "arquivo_original": original_file,
+                    "arquivo_renomeado": None,
+                    "status": "sem_match_paciente",
+                    "score": None,
+                })
+                continue 
+        
+            patient_found, patient_score, _ = patient_match
+            
+            patient_df = df_data[df_data['key'] == patient_found].copy()
+            patient_df['search_string'] = patient_df['descricao_servico'] + " " + patient_df['dt_realizacao'].str.replace("-", " ")
+            charges_list = patient_df['search_string'].tolist()
+            
+            charge_match = process.extractOne(
+                normalized_name, 
+                charges_list, 
+                scorer=fuzz.partial_ratio
+            )
+            
+            if not charge_match:
+                logging.warning(f"Sem match de cobrança para: '{original_file}'")
+                continue
+                
+            charge_found, charge_score, _ = charge_match
+            row = patient_df[patient_df['search_string'] == charge_found].iloc[0]
+            
+            cpf = str(row["cpf_beneficiario"]).replace(".", "").replace("-", "")
+            patient_name = str(row["nome_beneficiario"]).replace(" ", "")
+            charge_id = str(row["num_guia"])
+            
+            try:
+                date_obj = pd.to_datetime(row["realization_date"])
+                mm_yyyy = date_obj.strftime("%m%Y")
+            except Exception as e:
+                logging.error(f"Erro ao converter data de {charge_id}: {e}")
+                continue
+
+            new_name = f"{cpf}-{patient_name}-{charge_id}-{mm_yyyy}.pdf"
+            destination = output_path / new_name
+            
+            if destination.exists():
+                logging.warning(f"Destino já existe, pulando: '{new_name}'")
+                results.append({
+                    "arquivo_original": original_file,
+                    "arquivo_renomeado": new_name,
+                    "status": "destino_ja_existe",
+                    "score": patient_score,
+                })
+                continue
+
+            shutil.copy2(file_path, destination) 
+            logging.info(f"'{original_file}' → '{new_name}' (score {patient_score:.1f})")
+            results.append({
+                "arquivo_original": original_file,
+                "arquivo_renomeado": new_name,
+                "status": "renomeado",
+                "score": patient_score,
+            })
+
+        return results
