@@ -43,6 +43,8 @@ class FileManager:
     @classmethod
     def rename_pdf_files(cls, folder_path: str, output_folder: str, df_data: pd.DataFrame, min_score: float = 75.0):
         results: list[dict] = []
+        new_df = df_data.copy()
+        new_df['arquivo_renomeado'] = None
         
         output_path = Path(output_folder)
         output_path.mkdir(exist_ok=True)
@@ -65,7 +67,8 @@ class FileManager:
                 results.append({
                     "arquivo_original": original_file,
                     "arquivo_renomeado": None,
-                    "status": "sem_match_paciente",
+                    "status": "não renomeado",
+                    "renomeados": False,
                     "score": None,
                 })
                 continue 
@@ -84,6 +87,13 @@ class FileManager:
             
             if not charge_match:
                 logging.warning(f"Sem match de cobrança para: '{original_file}'")
+                results.append({
+                    "arquivo_original": original_file,
+                    "arquivo_renomeado": None,
+                    "status": "não renomeado",
+                    "renomeados": False,
+                    "score": patient_score,
+                })
                 continue
                 
             charge_found, charge_score, _ = charge_match
@@ -98,17 +108,26 @@ class FileManager:
                 mm_yyyy = date_obj.strftime("%m%Y")
             except Exception as e:
                 logging.error(f"Erro ao converter data de {charge_id}: {e}")
+                results.append({
+                    "arquivo_original": original_file,
+                    "arquivo_renomeado": None,
+                    "status": "não renomeado",
+                    "renomeados": False,
+                    "score": patient_score,
+                })
                 continue
 
             new_name = f"{cpf}-{patient_name}-{charge_id}-{mm_yyyy}.pdf"
             destination = output_path / new_name
+            new_df.loc[row.name, 'arquivo_renomeado'] = new_name
             
             if destination.exists():
                 logging.warning(f"Destino já existe, pulando: '{new_name}'")
                 results.append({
                     "arquivo_original": original_file,
                     "arquivo_renomeado": new_name,
-                    "status": "destino_ja_existe",
+                    "status": "não renomeado",
+                    "renomeados": False,
                     "score": patient_score,
                 })
                 continue
@@ -119,7 +138,9 @@ class FileManager:
                 "arquivo_original": original_file,
                 "arquivo_renomeado": new_name,
                 "status": "renomeado",
+                "renomeados": True,
                 "score": patient_score,
             })
-
+            
+        new_df.to_csv('data/data_with_renamed_files.csv', index=False)
         return results

@@ -1,9 +1,8 @@
 import logging
 from datetime import datetime
 
-import pandas as pd
-
 from src.pipeline import Pipeline
+from src.reporter import Reporter
 
 logger = logging.getLogger(__name__)
 
@@ -23,4 +22,4 @@ def main():
     
  
 if __name__ == '__main__':
-    main()
+    main() 
