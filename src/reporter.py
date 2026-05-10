@@ -54,5 +54,12 @@ class Reporter:
             ]
         }
         return pd.DataFrame(detailed_data)
+    
+    def _generate_alerts(self) -> pd.DataFrame:
+        
+      df_alerts = self.df_data[self.df_data['divergencias'].notna() & (self.df_data['divergencias'] != "Ok")]
+      
+      return df_alerts
+
 
         
