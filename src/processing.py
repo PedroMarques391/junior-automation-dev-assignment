@@ -53,17 +53,17 @@ class Processing:
         elif row['_merge'] == 'left_only':
             notes.append("Não lançado na planilha interna")
             logger.error(f"Não lançado na planilha interna: {row}")
-        elif row['_merge'] == 'both':
+        elif row['_merge'] == 'both': 
             if float(row['vl_liquido']) != float(row['valor']):
-                notes.append(f"Divergência de valor: CSV {row['vl_liquido']} vs Excel {row['valor']}")
+                notes.append(f"Divergência de valor: CSV {row['vl_liquido']} vs Excel {row['valor']} = {float(row['valor']) - float(row['vl_liquido'])}")
                 logger.warning(f"Divergência de valor: CSV {row['vl_liquido']} vs Excel {row['valor']}")
                 logger.warning(f"Diferença: R$ {float(row['valor']) - float(row['vl_liquido'])}")
             if row['nome_beneficiario'] != row['paciente']:
-                notes.append("Nome do paciente com erro de digitação")
+                notes.append(f"Nome do paciente com erro de digitação: CSV {row['nome_beneficiario']} vs Excel {row['paciente']}")
                 logger.warning(f"Nome do paciente com erro de digitação: {row['nome_beneficiario']} vs {row['paciente']}")
             if str(row['ans']) != str(row['registro_ans']):
-                notes.append("Divergência no código de convênio")
+                notes.append(f"Divergência no código de convênio: CSV {row['ans']} vs Excel {row['registro_ans']}")
                 logger.warning(f"Divergência no código de convênio: {row['ans']} vs {row['registro_ans']}")
                 
-        return " | ".join(notes)
+        return " | ".join(notes) if notes else "Ok"
     
