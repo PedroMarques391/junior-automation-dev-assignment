@@ -36,8 +36,9 @@ class Processing:
     def merge_dataFrames(df1: pd.DataFrame, df2: pd.DataFrame, key: str) -> pd.DataFrame:
         logger.info(f"Iniciando o cruzamento dos dados (merge) utilizando a chave '{key}'...")
         merged_df = pd.merge(df1, df2, on=key, how="outer", indicator=True)
-        return merged_df
-    
+        merged_df['key'] = merged_df['nome_beneficiario'].apply(Processing.normalize_name)
+        return merged_df 
+     
     @staticmethod
     def rename_columns(df: pd.DataFrame, columns: dict) -> pd.DataFrame:
         logger.info(f"Renomeando colunas: {columns}")
