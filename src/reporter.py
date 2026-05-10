@@ -43,20 +43,16 @@ class Reporter:
             "PDF Renomeado": self.df_data['arquivo_renomeado'],
             "Divergencias": self.df_data['divergencias'],
         }
+        
         return pd.DataFrame(detailed_data)
     
-    def _generate_alerts(self) -> pd.DataFrame:
-        
-        
-      df_alerts = self.df_data[self.df_data['divergencias'].notna() & (self.df_data['divergencias'] != "Ok")]
-      
-      return df_alerts
+    def _generate_alerts(self) -> pd.DataFrame:        
+        return self.df_data[self.df_data['divergencias'].notna() & (self.df_data['divergencias'] != "Ok")]
 
     def generate_report(self) -> None:
         summary_df = self._generate_summary()
         detailed_df = self._generate_detailed_data()
         alerts_df = self._generate_alerts()
-        
         
         wb = opxl.Workbook()
         ws_summary = wb.active
@@ -72,9 +68,11 @@ class Reporter:
         headers_alerts = alerts_df.columns.tolist()
         wb_alerts.append(headers_alerts) 
         
-        header_font = Font(bold=True, color="DC143C", size=12)
+        header_font = Font(bold=True, color="FFFFFF", size=12)
         header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
         alignment = Alignment(horizontal="center", vertical="center")
+        alert_fill = PatternFill(start_color="FF9900", end_color="FF9900", fill_type="solid")
+        alert_font = Font(color="FFFFFF", bold=True)
     
 
         for row in summary_df.itertuples(index=False): 
@@ -93,13 +91,24 @@ class Reporter:
                 cell.alignment = alignment
             
         for sheet in [ws_summary, wb_detailed, wb_alerts]: 
+            divergencias_col_idx = None
+            for cell in sheet[1]:
+                if cell.value == "Divergencias" or cell.value == "divergencias":
+                    divergencias_col_idx = cell.column
+                    break
+                    
             for column in sheet.columns:
                 max_length = 0
                 column_letter = column[0].column_letter
-        
+                
                 for cell in column:
                     cell.alignment = alignment
-            
+                    
+                    if divergencias_col_idx and cell.column == divergencias_col_idx and cell.row > 1:
+                        if cell.value and cell.value != "Ok":
+                            cell.fill = alert_fill
+                            cell.font = alert_font
+                            
                     try:
                         val_str = str(cell.value) if cell.value is not None else ""
                         if len(val_str) > max_length:
@@ -109,19 +118,12 @@ class Reporter:
         
                     adjusted_width = (max_length + 4)
                     sheet.column_dimensions[column_letter].width = adjusted_width
-            
-            
-             
-            
         
         
         path_name = f"relatorio_faturamento_{datetime.now().strftime('%Y-%m')}.xlsx"
         
         output_path = Path(self.output_folder) / path_name
         output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        if output_path.exists():
-            output_path.unlink() 
 
         wb.save(output_path)
         
