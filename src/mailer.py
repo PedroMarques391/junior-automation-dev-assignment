@@ -51,7 +51,6 @@ class Mailer:
         )
         msg.attach(part)
         
-      
         try:
             server = smtplib.SMTP(self.smtp_server, self.smtp_port)
             server.starttls() 
