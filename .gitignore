@@ -2,3 +2,5 @@
 .venv
 logs/
 data/laudos_renomeados/
+data/relatorio
+data/generated_csv

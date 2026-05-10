@@ -142,5 +142,5 @@ class FileManager:
                 "score": patient_score,
             })
             
-        new_df.to_csv('data/data_with_renamed_files.csv', index=False)
+        new_df.to_csv('data/generated_csv/data_with_renamed_files.csv', index=False)
         return results

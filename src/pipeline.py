@@ -1,4 +1,5 @@
 from asyncio.log import logger
+from pathlib import Path
 
 import pandas as pd
 
@@ -13,7 +14,10 @@ class Pipeline:
     def step1():
         logger.info("====== step 1: load data ======")
         logger.info('Iniciando o processo de consolidação de cobranças...')
-    
+        
+        Path(f'{Path.cwd()}/data/generated_csv').mkdir(parents=True, exist_ok=True)
+        
+
         convenio = DataLoader.load_data('data/cobrancas_convenio.csv')
         internas = DataLoader.load_data('data/cobrancas_internas.xlsx')
 
@@ -32,15 +36,15 @@ class Pipeline:
 
         merged_df['divergencias'] = merged_df.apply(Processing.check_divergences, axis=1)
 
-        merged_df.to_csv('data/merged_data.csv', index=False)
+        merged_df.to_csv('data/generated_csv/merged_data.csv', index=False)
 
-        logger.info(f'Arquivo salvo em: data/merged_data.csv')
+        logger.info(f'Arquivo salvo em: data/generated_csv/merged_data.csv')
             
         logger.info('Processo finalizado.')
         logger.info("====== step 1: finished ======")
     @staticmethod
     def step2():
-        merged_df = pd.read_csv('data/merged_data.csv')
+        merged_df = pd.read_csv('data/generated_csv/merged_data.csv')
         logger.info("====== step 2: rename pdf files ======")
         logger.info('Iniciando o processo de renomeação de arquivos pdf...')
     
@@ -55,7 +59,7 @@ class Pipeline:
         logger.info("====== step 3: generate report ======")
         logger.info('Iniciando o processo de geração de relatórios...')
         
-        df = pd.read_csv("data/data_with_renamed_files.csv")
+        df = pd.read_csv("data/generated_csv/data_with_renamed_files.csv")
         reporter = Reporter(df, "data/relatorio")
         reporter.generate_report()
               
