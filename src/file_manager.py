@@ -13,25 +13,31 @@ from unidecode import unidecode
 class FileManager:
     @staticmethod 
     def _reader_pdf(file_path: str) -> str:
+        logging.info(f'Carregando arquivo: {file_path}')
         pdf_reader = PdfReader(file_path).pages[0].extract_text()
         match = re.search(r'COB\d+', pdf_reader)
         if match:
+            logging.info(f'Arquivo carregado com sucesso: {file_path}')
             return match.group(0)
         return None
     
     @staticmethod
     def _normalize_pdf_name(file_name: str) -> str:
+        logging.info(f'Normalizando nome do arquivo: {file_name}')
         name = unidecode(file_name).upper().strip()
         name = re.sub(r'\s+', ' ', name)
+        logging.info(f'Nome do arquivo normalizado: {name}')
         return name
         
     @staticmethod
     def create_pdf_names_list(folder_path: str) -> list:
         pdf_names = []
+        logging.info(f'Criando lista de nomes de arquivos PDF...')
         for file in Path(folder_path).glob('*.pdf'):
             name = Path(file).stem
             normalized_name = FileManager._normalize_pdf_name(name)
             pdf_names.append(normalized_name) 
+        logging.info(f'Lista de nomes de arquivos PDF criada: {pdf_names}')
         return pdf_names 
     
     @classmethod
