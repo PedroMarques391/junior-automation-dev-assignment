@@ -5,6 +5,7 @@ import pandas as pd
 from src.file_manager import FileManager
 from src.loaders import DataLoader
 from src.processing import Processing
+from src.reporter import Reporter
 
 
 class Pipeline:
@@ -48,11 +49,24 @@ class Pipeline:
             
         logger.info('Processo finalizado.')
         logger.info("====== step 2: finished ======")
+      
+    @staticmethod  
+    def step3():
+        logger.info("====== step 3: generate report ======")
+        logger.info('Iniciando o processo de geração de relatórios...')
         
+        df = pd.read_csv("data/data_with_renamed_files.csv")
+        reporter = Reporter(df, "data/relatorio")
+        reporter.generate_report()
+              
+        logger.info('Processo finalizado.')
+        logger.info("====== step 3: finished ======")
+
     @classmethod
     def Pipeline(cls):
         cls.step1()
         cls.step2()
+        cls.step3()
 
 
         
