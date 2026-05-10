@@ -1,5 +1,8 @@
 from asyncio.log import logger
 
+import pandas as pd
+
+from src.file_manager import FileManager
 from src.loaders import DataLoader
 from src.processing import Processing
 
@@ -31,6 +34,23 @@ class Pipeline:
             
         logger.info('Processo finalizado.')
         logger.info("====== step 1: finished ======")
+    @staticmethod
+    def step2():
+        merged_df = pd.read_csv('data/merged_data.csv')
+        logger.info("====== step 2: rename pdf files ======")
+        logger.info('Iniciando o processo de renomeação de arquivos pdf...')
+    
+        results = FileManager.rename_pdf_files('data/laudos', 'data/laudos_renomeados', merged_df)
+        logger.info(f'Arquivo salvo em: data/laudos_renomeados')
+            
+        logger.info('Processo finalizado.')
+        logger.info("====== step 2: finished ======")
+        
+    @classmethod
+    def Pipeline(cls):
+        cls.step1()
+        cls.step2()
+
 
         
         

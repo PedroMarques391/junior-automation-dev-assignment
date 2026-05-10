@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
 
+import pandas as pd
+
 from src.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
@@ -14,11 +16,11 @@ def main():
         format='%(asctime)s [%(levelname)s] %(message)s',
         handlers=[
             logging.FileHandler(log_filename),
-            logging.StreamHandler()
         ]
     )
 
-    Pipeline.step1()
-
+    Pipeline.Pipeline()
+    
+ 
 if __name__ == '__main__':
     main()
