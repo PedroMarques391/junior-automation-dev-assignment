@@ -72,7 +72,7 @@ class Reporter:
         headers_alerts = alerts_df.columns.tolist()
         wb_alerts.append(headers_alerts) 
         
-        header_font = Font(bold=True, color="FFFFFF", size=12)
+        header_font = Font(bold=True, color="DC143C", size=12)
         header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
         alignment = Alignment(horizontal="center", vertical="center")
     
@@ -86,28 +86,32 @@ class Reporter:
         for row in alerts_df.itertuples(index=False):
             wb_alerts.append(row) 
             
-        for cell in ws_summary['1']:
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = alignment
-            
-        for column in ws_summary.columns:
-            max_length = 0
-            column_letter = column[0].column_letter
-            
-            for cell in column:
+        for row in [ws_summary['1'], wb_detailed['1'], wb_alerts['1']]:
+            for cell in row:
+                cell.font = header_font
+                cell.fill = header_fill
                 cell.alignment = alignment
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(cell.value)
-                except:
-                    pass
-                    
-            adjusted_width = (max_length + 4)
-            ws_summary.column_dimensions[column_letter].width = adjusted_width
+            
+        for sheet in [ws_summary, wb_detailed, wb_alerts]: 
+            for column in sheet.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+        
+                for cell in column:
+                    cell.alignment = alignment
+            
+                    try:
+                        val_str = str(cell.value) if cell.value is not None else ""
+                        if len(val_str) > max_length:
+                            max_length = len(val_str)
+                    except:
+                        pass
+        
+                    adjusted_width = (max_length + 4)
+                    sheet.column_dimensions[column_letter].width = adjusted_width
             
             
-            
+             
             
         
         
