@@ -24,20 +24,47 @@ class Mailer:
         msg['Subject'] = f'Relatório de Faturamento - {os.path.basename(file_path)}'
         
         html = f"""
-        <html>
-          <body>
-            <h2>Resumo do Faturamento</h2>
-            <p>Olá, segue o resumo do processamento:</p>
-            <ul>
-                <li><b>Total de Cobranças:</b> {summary['Total de Cobranças (Interno)']}</li>
-                <li><b>Total de Cobranças:</b> {summary['Total de Cobranças (CSV)']}</li>
-                <li><b>Valor Líquido:</b> R$ {summary['Valor Líquido Total (CSV)']:,.2f}</li>
-                <li><b>Glosas Identificadas:</b> R$ {summary['Total de Glosas']:,.2f}</li>
-                <li><b>Laudos Renomeados com Sucesso:</b> {summary['Laudos Renomeados com Sucesso']} itens precisam de atenção.</li>
-            </ul>
-            <p>O relatório detalhado está em anexo.</p>
-          </body>
-        </html> 
+<html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; margin: 0; padding: 0;">
+        <div style="background-color: #003399; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 24px;">Resumo do Faturamento</h1>
+        </div>
+        
+        <div style="padding: 30px; border: 1px solid #ddd; border-top: none; max-width: 600px; margin: 0 auto;">
+        <p style="font-size: 16px;">Olá, segue o resumo do processamento: </p>
+        
+        <div style="background-color: #f9f9f9; border-left: 5px solid #f27405; padding: 15px; margin: 20px 0;">
+            <h3 style="color: #003399; margin-top: 0;">Métricas Consolidadas</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>Total Interno:</b></td>
+                <td style="text-align: right; padding: 8px 0; border-bottom: 1px solid #eee;">{int(summary['Total de Cobranças (Interno)'])}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>Total Convênio (CSV):</b></td>
+                <td style="text-align: right; padding: 8px 0; border-bottom: 1px solid #eee;">{int(summary['Total de Cobranças (CSV)'])}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>Valor Líquido:</b></td>
+                <td style="text-align: right; padding: 8px 0; border-bottom: 1px solid #eee; color: #28a745; font-weight: bold;">R$ {summary['Valor Líquido Total (CSV)']:,.2f}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><b>Glosas Identificadas:</b></td>
+                <td style="text-align: right; padding: 8px 0; border-bottom: 1px solid #eee; color: #dc3545;">R$ {summary['Total de Glosas']:,.2f}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0;"><b>Laudos Renomeados:</b></td>
+                <td style="text-align: right; padding: 8px 0;">{int(summary['Laudos Renomeados com Sucesso'])} arquivos</td>
+            </tr>
+            </table>
+        </div>
+        <div>
+        <p style="font-size: 14px; color: #666;">
+            <b>Deixo em anexo o relatório detalhado.</b>
+        </p>
+        </div>
+    </body>
+</html> 
         """
         msg.attach(MIMEText(html, 'html'))
         with open(file_path, "rb") as attachment:
