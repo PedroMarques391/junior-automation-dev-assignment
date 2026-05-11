@@ -5,8 +5,8 @@
 ## 1. Instalar dependências:
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 
 ```
@@ -14,7 +14,7 @@ pip install -r requirements.txt
 ## 2. Descompactar o zip de dados necessário:
 
 ```bash
-unzip "data.zip"
+unzip -o data.zip
 ```
 
 ## 3. Configurar variáveis de ambiente:
@@ -41,16 +41,7 @@ tail -f logs/execution_YYYY-MM-DD_HH-MM-SS.log
 
 # Como executar o projeto com o shell script
 
-## 1. Instalar dependências:
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-```
-
-## 2. Configurar variáveis de ambiente:
+## 1. Configurar variáveis de ambiente:
 
 Copie o arquivo .env.example para .env e preencha as variáveis de ambiente:
 
@@ -58,13 +49,13 @@ Copie o arquivo .env.example para .env e preencha as variáveis de ambiente:
 cp .env.example .env
 ```
 
-## 3. Configurar permissão de execução:
+## 2. Configurar permissão de execução:
 
 ```bash
 chmod +x run.sh
 ```
 
-## 4. Executar a pipeline:
+## 3. Executar a pipeline:
 
 ```bash
 ./run.sh
