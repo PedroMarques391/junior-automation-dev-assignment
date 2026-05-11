@@ -11,11 +11,11 @@ load_dotenv()
 
 class Mailer:
     def __init__(self):
-        self.smtp_server = os.getenv("MAIL_HOST")
+        self.smtp_server = os.getenv("MAIL_HOST", "")
         self.smtp_port = int(os.getenv("MAIL_PORT", 587))
-        self.user = os.getenv("USER_EMAIL")
-        self.password = os.getenv("USER_PASS")
-        self.to_email = os.getenv("ADDRESSEE")
+        self.user = os.getenv("USER_EMAIL", "")
+        self.password = os.getenv("USER_PASS", "")
+        self.to_email = os.getenv("ADDRESSEE", "")
             
     def send_email(self, summary: dict, file_path: str): 
         msg = MIMEMultipart()

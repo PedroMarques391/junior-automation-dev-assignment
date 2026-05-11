@@ -19,7 +19,7 @@ class FileManager:
         if match:
             logging.info(f'Arquivo carregado com sucesso: {file_path}')
             return match.group(0)
-        return None
+        return ""
     
     @staticmethod
     def _normalize_pdf_name(file_name: str) -> str:

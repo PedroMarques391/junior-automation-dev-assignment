@@ -56,7 +56,10 @@ class Reporter:
         
         wb = opxl.Workbook()
         ws_summary = wb.active
-        ws_summary.title = "Resumo"
+        if ws_summary is None:
+            ws_summary = wb.create_sheet("Resumo")
+        else:
+            ws_summary.title = "Resumo"
         headers = summary_df.columns.tolist()
         ws_summary.append(headers)
         
