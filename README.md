@@ -36,3 +36,42 @@ python main.py
 ```bash
 tail -f logs/execution_YYYY-MM-DD_HH-MM-SS.log
 ```
+
+---
+
+# Como executar o projeto com o shell script
+
+## 1. Instalar dependências:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+```
+
+## 2. Configurar variáveis de ambiente:
+
+Copie o arquivo .env.example para .env e preencha as variáveis de ambiente:
+
+```bash
+cp .env.example .env
+```
+
+## 3. Configurar permissão de execução:
+
+```bash
+chmod +x run.sh
+```
+
+## 4. Executar a pipeline:
+
+```bash
+./run.sh
+```
+
+## 5. Verificar os logs:
+
+```bash
+tail -f logs/shell/execution_YYYY-MM-DD_HH-MM-SS.log
+```
