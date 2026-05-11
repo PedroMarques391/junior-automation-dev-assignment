@@ -1,9 +1,11 @@
 from asyncio.log import logger
+from pathlib import Path
 
 import pandas as pd
 
 from src.file_manager import FileManager
 from src.loaders import DataLoader
+from src.mailer import Mailer
 from src.processing import Processing
 from src.reporter import Reporter
 
@@ -13,7 +15,10 @@ class Pipeline:
     def step1():
         logger.info("====== step 1: load data ======")
         logger.info('Iniciando o processo de consolidação de cobranças...')
-    
+        
+        Path(f'{Path.cwd()}/data/generated_csv').mkdir(parents=True, exist_ok=True)
+        
+
         convenio = DataLoader.load_data('data/cobrancas_convenio.csv')
         internas = DataLoader.load_data('data/cobrancas_internas.xlsx')
 
@@ -32,15 +37,15 @@ class Pipeline:
 
         merged_df['divergencias'] = merged_df.apply(Processing.check_divergences, axis=1)
 
-        merged_df.to_csv('data/merged_data.csv', index=False)
+        merged_df.to_csv('data/generated_csv/merged_data.csv', index=False)
 
-        logger.info(f'Arquivo salvo em: data/merged_data.csv')
+        logger.info(f'Arquivo salvo em: data/generated_csv/merged_data.csv')
             
         logger.info('Processo finalizado.')
         logger.info("====== step 1: finished ======")
     @staticmethod
     def step2():
-        merged_df = pd.read_csv('data/merged_data.csv')
+        merged_df = pd.read_csv('data/generated_csv/merged_data.csv')
         logger.info("====== step 2: rename pdf files ======")
         logger.info('Iniciando o processo de renomeação de arquivos pdf...')
     
@@ -55,18 +60,35 @@ class Pipeline:
         logger.info("====== step 3: generate report ======")
         logger.info('Iniciando o processo de geração de relatórios...')
         
-        df = pd.read_csv("data/data_with_renamed_files.csv")
+        df = pd.read_csv("data/generated_csv/data_with_renamed_files.csv")
         reporter = Reporter(df, "data/relatorio")
         reporter.generate_report()
               
         logger.info('Processo finalizado.')
         logger.info("====== step 3: finished ======")
+        
+    @staticmethod 
+    def step4():
+        logger.info("====== step 4: send email ======")
+        logger.info('Iniciando o processo de envio de e-mail...')
+        
+        report_files = list(Path(f"{Path.cwd()}/data/relatorio/").glob("*.xlsx"))
+        report_df = pd.read_excel(report_files[-1])
+        normalize_dict = dict(zip(report_df['Descrição'], report_df['Valor']))
+        
+        mailer = Mailer()
+        mailer.send_email(normalize_dict, report_files[-1])
+        logger.info(f'E-mail enviado com sucesso para: {mailer.to_email}') 
+        
+        logger.info('Processo finalizado.')
+        logger.info("====== step 4: finished ======")
 
     @classmethod
     def Pipeline(cls):
         cls.step1()
         cls.step2()
         cls.step3()
+        cls.step4()
 
 
         
