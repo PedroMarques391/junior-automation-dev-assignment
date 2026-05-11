@@ -1,13 +1,12 @@
 #!/bin/bash
 
-
-if ! command -v python &> /dev/null; then
+if !command -v python &> /dev/null; then
     echo "Python não encontrado" >> "$LOG_FILE"
     exit 1
 fi
 
 
-if ! command -v pip &> /dev/null; then
+if !command -v pip &> /dev/null; then
     echo "Pip não encontrado" >> "$LOG_FILE"
     exit 1
 fi
