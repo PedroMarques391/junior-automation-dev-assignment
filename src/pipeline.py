@@ -78,6 +78,7 @@ class Pipeline:
         
         mailer = Mailer()
         mailer.send_email(normalize_dict, report_files[-1])
+        logger.info(f'E-mail enviado com sucesso para: {mailer.to_email}') 
         
         logger.info('Processo finalizado.')
         logger.info("====== step 4: finished ======")
