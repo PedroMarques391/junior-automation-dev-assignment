@@ -1,4 +1,5 @@
 #!/bin/bash
+LOG_FILE="$PROJECT_DIR/logs/shell/execution_$(date +%Y-%m-%d_%H-%M-%S).log"
 
 if !command -v python &> /dev/null; then
     echo "Python não encontrado" >> "$LOG_FILE"
@@ -13,9 +14,8 @@ fi
 
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-LOG_FILE="$PROJECT_DIR/logs/shell/execution_$(date +%Y-%m-%d_%H-%M-%S).log"
 PROGRAM_LOG_FILE="$PROJECT_DIR/logs/"
-VENV_PATH="$PROJECT_DIR/venv/bin/activate"
+VENV_PATH="$PROJECT_DIR/.venv/bin/activate"
 
 mkdir -p "$(dirname "$LOG_FILE")"
 
@@ -28,7 +28,7 @@ if [ -f "$VENV_PATH" ]; then
 else
     echo "Ambiente virtual não encontrado em $VENV_PATH, instalando agora" >> "$LOG_FILE"
     python3 -m venv .venv
-    source .venv/bin/activate
+    source "$VENV_PATH"
 fi
 
 
