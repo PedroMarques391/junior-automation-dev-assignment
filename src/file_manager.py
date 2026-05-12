@@ -7,7 +7,8 @@ from pathlib import Path
 import pandas as pd
 from pypdf import PdfReader
 from rapidfuzz import fuzz, process
-from unidecode import unidecode
+
+from src.utils.normalize_utils import NormalizeUtils
 
 
 class FileManager:
@@ -20,14 +21,6 @@ class FileManager:
             logging.info(f'Arquivo carregado com sucesso: {file_path}')
             return match.group(0)
         return ""
-    
-    @staticmethod
-    def _normalize_pdf_name(file_name: str) -> str:
-        logging.info(f'Normalizando nome do arquivo: {file_name}')
-        name = unidecode(file_name).upper().strip()
-        name = re.sub(r'\s+', ' ', name)
-        logging.info(f'Nome do arquivo normalizado: {name}')
-        return name
         
     @staticmethod
     def create_pdf_names_list(folder_path: str) -> list:
@@ -53,7 +46,7 @@ class FileManager:
         
         for file_path in Path(folder_path).glob('*.pdf'):
             original_file = file_path.name
-            normalized_name = cls._normalize_pdf_name(file_path.stem)
+            normalized_name = NormalizeUtils.normalize_name(file_path.stem)
 
             patient_match = process.extractOne(
                 normalized_name,

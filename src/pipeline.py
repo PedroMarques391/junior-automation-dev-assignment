@@ -8,6 +8,7 @@ from src.loaders import DataLoader
 from src.mailer import Mailer
 from src.processing import Processing
 from src.reporter import Reporter
+from src.utils.normalize_utils import NormalizeUtils
 
 
 class Pipeline:
@@ -22,16 +23,16 @@ class Pipeline:
         convenio = DataLoader.load_data('data/cobrancas_convenio.csv')
         internas = DataLoader.load_data('data/cobrancas_internas.xlsx')
 
-        convenio['nome_beneficiario'] = convenio['nome_beneficiario'].apply(Processing.normalize_name)
-        internas['paciente'] = internas['paciente'].apply(Processing.normalize_name)
+        convenio['nome_beneficiario'] = convenio['nome_beneficiario'].apply(NormalizeUtils.normalize_name)
+        internas['paciente'] = internas['paciente'].apply(NormalizeUtils.normalize_name)
         
         convenio['ans'] = convenio['ans'].astype('Int64')
         internas['registro_ans'] = internas['registro_ans'].astype('Int64')
 
-        convenio['vl_liquido'] = convenio['vl_liquido'].apply(Processing.normalize_value_csv_to_float)
+        convenio['vl_liquido'] = convenio['vl_liquido'].apply(NormalizeUtils.normalize_value_csv_to_float)
         internas['valor'] = internas['valor'].astype(float)
 
-        internas = Processing.rename_columns(internas, {"id_cobranca": "num_guia"})
+        internas = NormalizeUtils.rename_columns(internas, {"id_cobranca": "num_guia"})
 
         merged_df = Processing.merge_dataFrames(convenio, internas, key='num_guia')
 
