@@ -17,8 +17,8 @@ def main():
             logging.FileHandler(log_filename),
         ]
     )
-
-    Pipeline.Pipeline()
+    pipeline = Pipeline(logger)
+    pipeline.run()
     
  
 if __name__ == '__main__':

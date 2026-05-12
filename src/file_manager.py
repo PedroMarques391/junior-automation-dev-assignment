@@ -12,29 +12,29 @@ from src.utils.normalize_utils import NormalizeUtils
 
 
 class FileManager:
-    @staticmethod 
-    def _reader_pdf(file_path: str) -> str:
-        logging.info(f'Carregando arquivo: {file_path}')
+    def __init__(self, logger: logging.Logger):
+        self.logger = logger
+        
+    def _reader_pdf(self, file_path: str) -> str:
+        self.logger.info(f'Carregando arquivo: {file_path}')
         pdf_reader = PdfReader(file_path).pages[0].extract_text()
         match = re.search(r'COB\d+', pdf_reader)
         if match:
-            logging.info(f'Arquivo carregado com sucesso: {file_path}')
+            self.logger.info(f'Arquivo carregado com sucesso: {file_path}')
             return match.group(0)
         return ""
         
-    @staticmethod
-    def create_pdf_names_list(folder_path: str) -> list:
+    def create_pdf_names_list(self, folder_path: str) -> list:
         pdf_names = []
-        logging.info(f'Criando lista de nomes de arquivos PDF...')
+        self.logger.info(f'Criando lista de nomes de arquivos PDF...')
         for file in Path(folder_path).glob('*.pdf'):
             name = Path(file).stem
-            normalized_name = FileManager._normalize_pdf_name(name)
+            normalized_name = NormalizeUtils.normalize_name(name)
             pdf_names.append(normalized_name) 
-        logging.info(f'Lista de nomes de arquivos PDF criada: {pdf_names}')
+        self.logger.info(f'Lista de nomes de arquivos PDF criada: {pdf_names}')
         return pdf_names 
     
-    @classmethod
-    def rename_pdf_files(cls, folder_path: str, output_folder: str, df_data: pd.DataFrame, min_score: float = 75.0):
+    def rename_pdf_files(self, folder_path: str, output_folder: str, df_data: pd.DataFrame, min_score: float = 75.0):
         results: list[dict] = []
         new_df = df_data.copy()
         new_df['arquivo_renomeado'] = None
@@ -56,7 +56,7 @@ class FileManager:
             )        
            
             if patient_match is None:
-                logging.warning(f"Sem match de paciente para: '{original_file}'")
+                self.logger.warning(f"Sem match de paciente para: '{original_file}'")
                 results.append({
                     "arquivo_original": original_file,
                     "arquivo_renomeado": None,
@@ -79,7 +79,7 @@ class FileManager:
             )
             
             if not charge_match:
-                logging.warning(f"Sem match de cobrança para: '{original_file}'")
+                self.logger.warning(f"Sem match de cobrança para: '{original_file}'")
                 results.append({
                     "arquivo_original": original_file,
                     "arquivo_renomeado": None,
@@ -100,7 +100,7 @@ class FileManager:
                 date_obj = pd.to_datetime(row["dt_realizacao"])
                 mm_yyyy = date_obj.strftime("%m%Y")
             except Exception as e:
-                logging.error(f"Erro ao converter data de {charge_id}: {e}")
+                self.logger.error(f"Erro ao converter data de {charge_id}: {e}")
                 results.append({
                     "arquivo_original": original_file,
                     "arquivo_renomeado": None,
@@ -115,7 +115,7 @@ class FileManager:
             new_df.loc[row.name, 'arquivo_renomeado'] = new_name
             
             if destination.exists():
-                logging.warning(f"Destino já existe, pulando: '{new_name}'")
+                self.logger.warning(f"Destino já existe, pulando: '{new_name}'")
                 results.append({
                     "arquivo_original": original_file,
                     "arquivo_renomeado": new_name,
@@ -125,19 +125,25 @@ class FileManager:
                 })
                 continue
 
-            success = FileUtils.copy_file(file_path, destination) 
-            if success:
-                logging.info(f"'{original_file}' → '{new_name}' (score {patient_score:.1f})")
-            else:
-                logging.error(f"Falha ao copiar '{original_file}' para '{new_name}'")
-                
-            results.append({
-                "arquivo_original": original_file,
-                "arquivo_renomeado": new_name,
-                "status": "renomeado",
-                "renomeados": True,
-                "score": patient_score,
-            })
+            try:
+                FileUtils.copy_file(file_path, destination) 
+                self.logger.info(f"'{original_file}' → '{new_name}' (score {patient_score:.1f})")
+                results.append({
+                    "arquivo_original": original_file,
+                    "arquivo_renomeado": new_name,
+                    "status": "renomeado",
+                    "renomeados": True,
+                    "score": patient_score,
+                })
+            except Exception as e:
+                self.logger.error(f"Falha ao copiar '{original_file}' para '{new_name}': {e}")
+                results.append({
+                    "arquivo_original": original_file,
+                    "arquivo_renomeado": None,
+                    "status": "não renomeado",
+                    "renomeados": False,
+                    "score": patient_score,
+                })
             
         new_df.to_csv('data/generated_csv/data_with_renamed_files.csv', index=False)
         return results
