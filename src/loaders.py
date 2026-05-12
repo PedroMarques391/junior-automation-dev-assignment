@@ -28,7 +28,6 @@ class DataLoader:
             df = cls._load_excel(file_path)
         else:
             raise ValueError(f"Formato de arquivo não suportado: {file_path}")
-            
         logger.info(f"Dados carregados com sucesso. Total de linhas: {len(df)}")
         return df
         
