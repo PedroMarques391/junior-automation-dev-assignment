@@ -1,13 +1,13 @@
 import logging
 import os
 import re
-import shutil
 from pathlib import Path
 
 import pandas as pd
 from pypdf import PdfReader
 from rapidfuzz import fuzz, process
 
+from src.utils.file_utils import FileUtils
 from src.utils.normalize_utils import NormalizeUtils
 
 
@@ -40,7 +40,7 @@ class FileManager:
         new_df['arquivo_renomeado'] = None
         
         output_path = Path(output_folder)
-        output_path.mkdir(exist_ok=True)
+        FileUtils.create_directory(output_path)
         
         unique_clients = df_data['key'].dropna().unique().tolist()
         
@@ -125,8 +125,12 @@ class FileManager:
                 })
                 continue
 
-            shutil.copy2(file_path, destination) 
-            logging.info(f"'{original_file}' → '{new_name}' (score {patient_score:.1f})")
+            success = FileUtils.copy_file(file_path, destination) 
+            if success:
+                logging.info(f"'{original_file}' → '{new_name}' (score {patient_score:.1f})")
+            else:
+                logging.error(f"Falha ao copiar '{original_file}' para '{new_name}'")
+                
             results.append({
                 "arquivo_original": original_file,
                 "arquivo_renomeado": new_name,

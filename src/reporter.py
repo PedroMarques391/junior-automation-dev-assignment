@@ -5,6 +5,7 @@ import openpyxl as opxl
 import pandas as pd
 from openpyxl.styles import Alignment, Font, PatternFill
 
+from src.utils.file_utils import FileUtils
 from src.utils.normalize_utils import NormalizeUtils
 
 
@@ -126,7 +127,7 @@ class Reporter:
         path_name = f"relatorio_faturamento_{datetime.now().strftime('%Y-%m')}.xlsx"
         
         output_path = Path(self.output_folder) / path_name
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        FileUtils.create_directory(output_path.parent)
 
         wb.save(output_path)
         

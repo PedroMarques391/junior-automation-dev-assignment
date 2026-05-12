@@ -8,6 +8,7 @@ from src.loaders import DataLoader
 from src.mailer import Mailer
 from src.processing import Processing
 from src.reporter import Reporter
+from src.utils.file_utils import FileUtils
 from src.utils.normalize_utils import NormalizeUtils
 
 
@@ -17,7 +18,7 @@ class Pipeline:
         logger.info("====== step 1: load data ======")
         logger.info('Iniciando o processo de consolidação de cobranças...')
         
-        Path(f'{Path.cwd()}/data/generated_csv').mkdir(parents=True, exist_ok=True)
+        FileUtils.create_directory(f'{Path.cwd()}/data/generated_csv')
         
 
         convenio = DataLoader.load_data('data/cobrancas_convenio.csv')
