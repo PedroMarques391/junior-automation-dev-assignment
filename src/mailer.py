@@ -1,3 +1,4 @@
+import logging
 import os
 import smtplib
 from email import encoders
@@ -6,6 +7,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from dotenv import load_dotenv
+from numpy._core import function_base
 
 load_dotenv()
 
@@ -83,8 +85,8 @@ class Mailer:
             server.starttls() 
             server.login(self.user, self.password)
             server.send_message(msg)
-            server.quit()
-
         except Exception as e:
-            print(f"Erro ao conectar ao servidor SMTP: {e}")
-        
+            logging.error(f"Erro ao conectar ao servidor SMTP: {e}")
+            raise ValueError("Erro ao conectar ao servidor SMTP.")
+        finally:
+            server.quit()
