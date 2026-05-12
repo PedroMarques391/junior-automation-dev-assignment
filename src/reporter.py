@@ -5,7 +5,8 @@ import openpyxl as opxl
 import pandas as pd
 from openpyxl.styles import Alignment, Font, PatternFill
 
-from src.processing import Processing
+from src.utils.file_utils import FileUtils
+from src.utils.normalize_utils import NormalizeUtils
 
 
 class Reporter:
@@ -26,8 +27,8 @@ class Reporter:
             "Valor": [ 
                 len(self.df_data[self.df_data['_merge'] != 'right_only']),
                 len(self.df_data[self.df_data['_merge'] != 'left_only']),
-                self.df_data['vl_liquido'].apply(Processing.normalize_value_csv_to_float).sum(),
-                self.df_data['vl_glosa'].apply(Processing.normalize_value_csv_to_float).sum(),
+                self.df_data['vl_liquido'].apply(NormalizeUtils.normalize_value_csv_to_float).sum(),
+                self.df_data['vl_glosa'].apply(NormalizeUtils.normalize_value_csv_to_float).sum(),
                 self.df_data['arquivo_renomeado'].count()
             ]
         }
@@ -126,7 +127,7 @@ class Reporter:
         path_name = f"relatorio_faturamento_{datetime.now().strftime('%Y-%m')}.xlsx"
         
         output_path = Path(self.output_folder) / path_name
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        FileUtils.create_directory(output_path.parent)
 
         wb.save(output_path)
         

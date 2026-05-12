@@ -10,12 +10,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Mailer:
-    def __init__(self):
-        self.smtp_server = os.getenv("MAIL_HOST", "")
-        self.smtp_port = int(os.getenv("MAIL_PORT", 587))
-        self.user = os.getenv("USER_EMAIL", "")
-        self.password = os.getenv("USER_PASS", "")
-        self.to_email = os.getenv("ADDRESSEE", "")
+    def __init__(self, logger):
+        self.logger = logger
+        self.smtp_server = os.getenv("MAIL_HOST")
+        self.smtp_port = int(os.getenv("MAIL_PORT"))
+        self.user = os.getenv("USER_EMAIL")
+        self.password = os.getenv("USER_PASS")
+        self.to_email = os.getenv("ADDRESSEE")
+        
+        if not all([self.smtp_server, self.user, self.password, self.to_email]):
+            self.logger.error("Configurações de SMTP ausentes no arquivo .env.")
+            raise ValueError("As variáveis MAIL_HOST, USER_EMAIL, USER_PASS e ADDRESSEE precisam estar configuradas no .env")
             
     def send_email(self, summary: dict, file_path: str): 
         msg = MIMEMultipart()
@@ -83,8 +88,8 @@ class Mailer:
             server.starttls() 
             server.login(self.user, self.password)
             server.send_message(msg)
-            server.quit()
-
         except Exception as e:
-            print(f"Erro ao conectar ao servidor SMTP: {e}")
-        
+            self.logger.error(f"Erro ao conectar ao servidor SMTP: {e}")
+            raise ValueError("Erro ao conectar ao servidor SMTP.")
+        finally:
+            server.quit()
